@@ -23,6 +23,7 @@ def create_config(env_name, ctrl_type, ctrl_args, overrides, logdir):
                 delay_hor=int
             ),
             exp_cfg=DotMap(
+                plan_hor=int,
                 ntrain_iters=int,
                 nrollouts_per_iter=int,
                 ninit_rollouts=int
@@ -182,6 +183,7 @@ def _create_exp_config(exp_cfg, cfg_module, logdir, type_map):
     exp_cfg.sim_cfg.env = cfg_module.ENV
     exp_cfg.sim_cfg.task_hor = cfg_module.TASK_HORIZON
 
+    exp_cfg.exp_cfg.plan_hor = cfg_module.PLAN_HOR
     exp_cfg.exp_cfg.ntrain_iters = cfg_module.NTRAIN_ITERS
     exp_cfg.exp_cfg.nrollouts_per_iter = cfg_module.NROLLOUTS_PER_ITER
 

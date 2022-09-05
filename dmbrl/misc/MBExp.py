@@ -14,7 +14,7 @@ from dmbrl.misc import logger
 import copy
 import numpy as np
 
-# from .my_eval_callback import MyEvalCallback
+from dmbrl.misc.my_eval_callback import MyEvalCallback
 
 
 class MBExperiment:
@@ -64,6 +64,9 @@ class MBExperiment:
         else:
             self.agent = Agent(DotMap(env=self.env, noisy_actions=False, params=params))
 
+        self.plan_hor = get_required_argument(
+            params.exp_cfg, "plan_hor", "Must provide planning horizon."
+        )
         self.ntrain_iters = get_required_argument(
             params.exp_cfg, "ntrain_iters", "Must provide number of training iterations."
         )
@@ -81,11 +84,11 @@ class MBExperiment:
         self.neval = params.log_cfg.get("neval", 1)
         self.delay_hor = params.sim_cfg.get("delay_hor", 0)
 
-        print(f"{self.policy}")
+        print(f"PLAN_HORIZON {self.plan_hor}")
         self.policy.set_env(self.env)
         self.policy.logger = logger
-        # self.eval_callback = MyEvalCallback(self.env, log_path=self.logdir + "/evaluations.npz")
-        # self.eval_callback.init_callback(self.policy)
+        self.eval_callback = MyEvalCallback(self.env, log_path=self.logdir + "/evaluations.npz")
+        self.eval_callback.init_callback(self.policy)
 
     def run_experiment(self):
         """Perform experiment.
@@ -127,7 +130,7 @@ class MBExperiment:
                 [sample["rewards"] for sample in samples]
             )
 
-        # self.eval_callback.on_training_start(None, None)
+        self.eval_callback.on_training_start(None, None)
 
         self.steps = 0
         # Training loop
@@ -145,7 +148,7 @@ class MBExperiment:
             needed_num_steps = self.task_hor * \
                 (max(self.neval, self.nrollouts_per_iter) - self.nrecord)
             finished_num_steps = 0
-            # self.eval_callback.on_rollout_start()
+            self.eval_callback.on_rollout_start()
             while True:
                 samples.append(
                     self.agent.sample(
@@ -155,11 +158,11 @@ class MBExperiment:
                 finished_num_steps += len(samples[-1]["ac"])
 
                 setattr(self.policy, "num_timesteps", self.steps + finished_num_steps)
-                # self.eval_callback.on_step()
+                self.eval_callback.on_step()
                 
                 if finished_num_steps >= needed_num_steps:
                     self.steps += finished_num_steps
-                    # self.eval_callback.on_rollout_end()
+                    self.eval_callback.on_rollout_end()
                     break
 
                 # self.policy.set_num_timesteps(finished_num_steps)
@@ -219,4 +222,4 @@ class MBExperiment:
 
                 # TODO: train the policy network
 
-        # self.eval_callback.on_training_end()
+        self.eval_callback.on_training_end()

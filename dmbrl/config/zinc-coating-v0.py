@@ -21,8 +21,9 @@ from zinc_coating import zinc_coating_environment
 
 class OwnZincCoatingConfigModule:
     ENV_NAME = "MBRLGYM_zinc_coating_po-v0"
+    # 2500 * 120 = 300000 timesteps of training
     TASK_HORIZON = 2500
-    NTRAIN_ITERS = 100
+    NTRAIN_ITERS = 120
     NROLLOUTS_PER_ITER = 1
     PLAN_HOR = 11
     INIT_VAR = 0.25
