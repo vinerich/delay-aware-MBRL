@@ -14,7 +14,6 @@ from dmbrl.controllers.MPC import MPC
 from dmbrl.config import create_config
 from dmbrl.misc import logger
 
-
 def main(env, ctrl_type, ctrl_args, overrides, logdir, args):
     ctrl_args = DotMap(**{key: val for (key, val) in ctrl_args})
     cfg = create_config(env, ctrl_type, ctrl_args, overrides, logdir)

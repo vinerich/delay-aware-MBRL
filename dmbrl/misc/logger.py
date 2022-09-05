@@ -94,6 +94,7 @@ def set_file_handler(path=None, prefix='', time_str=''):
     )
     file_handler.setFormatter(_MyFormatter(datefmt='%m%d %H-%M-%S'))
     _logger.addHandler(file_handler)
+    _logger.addHandler(logging.StreamHandler(sys.stdout))
 
     _logger.info('Log file set to {}'.format(path))
     return

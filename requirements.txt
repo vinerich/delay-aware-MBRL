@@ -1,10 +1,11 @@
 dotmap==1.2.20
 future==0.16.0
-gpflow
-gym==0.9.4
+gpflow==1.5.1
+gym==0.19
 mujoco-py==0.5.7
-numpy==1.14.0
-scipy==0.19.0
-tensorflow-gpu==1.9.0
+numpy==1.18.0
+scipy==1.1.0
+tensorflow==1.15.0
 tqdm==4.19.4
 termcolor
+stable_baselines3>=1.3.0

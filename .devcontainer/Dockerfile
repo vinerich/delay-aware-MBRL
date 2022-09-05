@@ -15,14 +15,4 @@ RUN \
 
 RUN pip install git+https://github.com/vinerich/zinc-coating-gym-env.git
 
-ENV PWD=/app
-RUN mkdir /app
-WORKDIR $PWD
-
-COPY . .
-
-RUN chmod +x ./train.sh
-
 ENV PATH=$VENV/bin:$PATH
-
-CMD ["/app/train.sh"]

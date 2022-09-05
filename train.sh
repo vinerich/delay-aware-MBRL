@@ -1,6 +1,7 @@
 #!/bin/bash
+
 python mbexp.py -logdir ./log/DATS \
-    -env gym_pendulum \
+    -env zinc-coating-v0 \
     -o exp_cfg.exp_cfg.ntrain_iters 200 \
     -o exp_cfg.sim_cfg.delay_hor 10\
     -o ctrl_cfg.prop_cfg.delay_step 10\

@@ -128,6 +128,7 @@ class MPC(Controller):
 
         # Create action sequence optimizer
         opt_cfg = params.opt_cfg.get("cfg", {})
+        print(f"Using {params.opt_cfg.mode} optimizer with delay_step {self.delay_step}")
         self.optimizer = MPC.optimizers[params.opt_cfg.mode](
             sol_dim=(self.plan_hor-self.delay_step) * self.dU,
             delay_step = self.delay_step,
@@ -225,6 +226,23 @@ class MPC(Controller):
             for update_fn in self.update_fns:
                 update_fn(self.model.sess)
 
+    def predict(self, observation, state, episode_start, deterministic):
+        # print(f"{observation}")
+        # print(f"{tuple(observation[0])}")
+        return self.act(tuple(observation[0]), 0)
+
+    def save(self, path):
+        self.model.save(path)
+
+    def get_env(self):
+        return self.env
+
+    def set_env(self, env):
+        self.env = env
+
+    def set_num_timesteps(self, steps):
+        self.num_timesteps = steps
+
     def act(self, obs, t, get_pred_cost=False, test_policy=False, average=False):
         """Returns the action that this controller would take at time t given observation obs.
 
@@ -236,6 +254,7 @@ class MPC(Controller):
 
         Returns: An action (and possibly the predicted cost)
         """
+
         if not self.has_been_trained:
             return np.random.uniform(self.ac_lb, self.ac_ub, self.ac_lb.shape)
         if self.ac_buf.shape[0] > 0:
@@ -254,11 +273,18 @@ class MPC(Controller):
             )
 
         elif self.model.is_tf_model:
-            
+            # print(f"{obs}")            
             self.sy_cur_obs.load(obs, self.model.sess)
+
             soln, self.prev_sol = self.optimizer.obtain_solution(
                 self.last_action, self.prev_sol, self.init_var, self.per, self.dU
             )
+            # print(f"{soln}")
+            # pred_cost = self.model.sess.run(
+            #         self.pred_cost,
+            #         feed_dict={self.ac_seq: soln[None]}
+            #     )[0]
+            # print(f"{pred_cost}")
         else:
             soln, self.prev_sol = self.optimizer.obtain_solution(
                 self.last_action, self.prev_sol, self.init_var, self.per, self.dU, obs
@@ -268,6 +294,8 @@ class MPC(Controller):
         assert self.per == 1  # the pwcem does not support per != 1
         # self.ac_buf = soln[:self.per * self.dU].reshape(-1, self.dU)
         self.ac_buf = soln[:self.per * self.dU].reshape(-1, self.dU)
+        # print(f"soln: {soln}")
+        # print(f"ac_buf: {self.ac_buf}")
 
         if get_pred_cost and not (self.log_traj_preds or self.log_particles):
             if self.model.is_tf_model:
@@ -471,6 +499,7 @@ class MPC(Controller):
 
             def iteration(t, total_cost, cur_obs, pred_trajs):
                 cur_acs = ac_seqs[t]
+                #print(f"{t.get_shape()}, {total_cost.get_shape()}, {cur_obs.get_shape()}, {cur_acs.get_shape()}")
                 next_obs = self._predict_next_obs(cur_obs, cur_acs)
                 if self.obs_ac_cost_fn is not None:
                     delta_cost = tf.reshape(

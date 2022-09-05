@@ -3,7 +3,6 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 import numpy as np
-from gym.monitoring import VideoRecorder
 from dotmap import DotMap
 from dmbrl.misc import logger
 
@@ -60,7 +59,7 @@ class Agent:
         if test_policy:
             logger.info('Testing the policy')
         video_record = record_fname is not None
-        recorder = None if not video_record else VideoRecorder(self.env, record_fname)
+        recorder = None
 
         times, rewards = [], []
         O, A, reward_sum, done = [self.env.reset()], [], 0, False
@@ -69,18 +68,22 @@ class Agent:
         policy.reset()
         # add delay
         # delaystep = 10
+
+        # Removed delay here for testing
         for _ in range(delay_hor):
             A.append(np.zeros(self.env.action_space.shape[0]))
+
         # for t in range(20):
         for t in range(horizon):
-            if hasattr(self.env, 'render_imitation'):
-                self.env.render_imitation()
+            # if hasattr(self.env, 'render_imitation'):
+            #     self.env.render_imitation()
             if t % 50 == 10 and t > 1:
-                logger.info('Current timesteps: %d / %d, average time: %.5f'
-                            % (t, horizon, np.mean(times)))
-            if video_record:
-                recorder.capture_frame()
+                logger.info('Current timesteps: %d / %d, average time: %.5f, current rewards: %.5f, mean: %.5f'
+                            % (t, horizon, np.mean(times), np.sum(rewards), np.mean(rewards)))
+            # if video_record:
+            #     recorder.capture_frame()
             start = time.time()
+            # print(f"Selecting action with test_policy: {test_policy}")
             if test_policy:
                 A.append(policy.act(O[t], t, test_policy=test_policy, average=average))
             else:
@@ -88,6 +91,7 @@ class Agent:
             # print(A)
             times.append(time.time() - start)
 
+            # print(f"Selected action {A[t]}")
             if self.noise_stddev is None:
                 # print(t, A[t], A[t+1])
                 obs, reward, done, info = self.env.step(A[t])
@@ -98,6 +102,8 @@ class Agent:
                                                self.env.action_space.low),
                                     self.env.action_space.high)
                 obs, reward, done, info = self.env.step(action)
+
+            # print(f"Stepped environment with action {A[t]}")
             O.append(obs)
             reward_sum += reward
             rewards.append(reward)
@@ -111,6 +117,14 @@ class Agent:
         logger.info("Average action selection time: %.4f" % np.mean(times))
         logger.info("Rollout length: %d" % len(A))
 
+        # return {
+        #         "obs": np.array(O),
+        #         "ac": np.array(A),
+        #         "reward_sum": reward_sum,
+        #         "rewards": np.array(rewards),
+        #     }
+
+        # Activate this for default delay
         if delay_hor == 0:
             return {
                 "obs": np.array(O),

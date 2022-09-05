@@ -175,5 +175,11 @@ class CEMOptimizer(Optimizer):
         sol = np.reshape(sol, [-1])
 
         # prev_sol is going to be used next timestep
-        prev_sol = self.update_prev_sol(per, dU, sol)
+
+        ## outcommented to try and use current solution in next timestep
+        # print(f"per {per}, {dU}, {sol}")
+        # prev_sol = self.update_prev_sol(per, dU, sol)
+        # print(f"prev_sol #{prev_sol}")
+        prev_sol = sol
+
         return sol, prev_sol

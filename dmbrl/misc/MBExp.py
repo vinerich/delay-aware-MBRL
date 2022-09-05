@@ -14,6 +14,8 @@ from dmbrl.misc import logger
 import copy
 import numpy as np
 
+# from .my_eval_callback import MyEvalCallback
+
 
 class MBExperiment:
 
@@ -79,6 +81,12 @@ class MBExperiment:
         self.neval = params.log_cfg.get("neval", 1)
         self.delay_hor = params.sim_cfg.get("delay_hor", 0)
 
+        print(f"{self.policy}")
+        self.policy.set_env(self.env)
+        self.policy.logger = logger
+        # self.eval_callback = MyEvalCallback(self.env, log_path=self.logdir + "/evaluations.npz")
+        # self.eval_callback.init_callback(self.policy)
+
     def run_experiment(self):
         """Perform experiment.
         """
@@ -119,6 +127,9 @@ class MBExperiment:
                 [sample["rewards"] for sample in samples]
             )
 
+        # self.eval_callback.on_training_start(None, None)
+
+        self.steps = 0
         # Training loop
         for i in range(self.ntrain_iters):
 
@@ -134,6 +145,7 @@ class MBExperiment:
             needed_num_steps = self.task_hor * \
                 (max(self.neval, self.nrollouts_per_iter) - self.nrecord)
             finished_num_steps = 0
+            # self.eval_callback.on_rollout_start()
             while True:
                 samples.append(
                     self.agent.sample(
@@ -142,8 +154,16 @@ class MBExperiment:
                 )
                 finished_num_steps += len(samples[-1]["ac"])
 
+                setattr(self.policy, "num_timesteps", self.steps + finished_num_steps)
+                # self.eval_callback.on_step()
+                
                 if finished_num_steps >= needed_num_steps:
+                    self.steps += finished_num_steps
+                    # self.eval_callback.on_rollout_end()
                     break
+
+                # self.policy.set_num_timesteps(finished_num_steps)
+
             logger.info("Rewards obtained: {}".format(
                 [sample["reward_sum"] for sample in samples[:self.neval]])
             )
@@ -198,3 +218,5 @@ class MBExperiment:
                 )
 
                 # TODO: train the policy network
+
+        # self.eval_callback.on_training_end()
