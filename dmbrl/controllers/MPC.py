@@ -578,7 +578,7 @@ class MPC(Controller):
                     prediction_mean = tf.reduce_mean(predictions, axis=1, keep_dims=True)
                     prediction_var = tf.reduce_mean(tf.square(predictions - prediction_mean), axis=1, keep_dims=True)
                     z = tf.random_normal(shape=tf.shape(predictions), mean=0, stddev=1)
-                    samples = prediction_mean + z * tf.sqrt(prediction_var)
+                    s = prediction_mean + z * tf.sqrt(prediction_var)
                     predictions = tf.reshape(samples, [-1, model_out_dim])
             else:
                 predictions = mean
