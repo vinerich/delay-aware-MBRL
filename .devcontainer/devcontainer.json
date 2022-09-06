@@ -9,7 +9,7 @@
             ]
         }
     },
-    "dockerFile": "./Dockerfile",
+    "dockerFile": "../Dockerfile.dev",
     "mounts": [],
     "containerEnv": {},
     "settings": {}
