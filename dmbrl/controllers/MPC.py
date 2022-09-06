@@ -128,7 +128,7 @@ class MPC(Controller):
 
         # Create action sequence optimizer
         opt_cfg = params.opt_cfg.get("cfg", {})
-        print(f"Using {params.opt_cfg.mode} optimizer with delay_step {self.delay_step}")
+        print(f"Using {params.opt_cfg.mode} optimizer with plan_hor {self.plan_hor} and delay_step {self.delay_step}")
         self.optimizer = MPC.optimizers[params.opt_cfg.mode](
             sol_dim=(self.plan_hor-self.delay_step) * self.dU,
             delay_step = self.delay_step,

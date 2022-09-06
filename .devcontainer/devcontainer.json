@@ -10,6 +10,11 @@
         }
     },
     "dockerFile": "../Dockerfile.dev",
+    "runArgs": [
+        "--privileged",
+        "--gpus",
+        "all"
+    ],
     "mounts": [],
     "containerEnv": {},
     "settings": {}

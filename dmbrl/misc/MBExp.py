@@ -15,9 +15,6 @@ import copy
 import numpy as np
 import pandas as pd
 
-from dmbrl.misc.my_eval_callback import MyEvalCallback
-
-
 class MBExperiment:
 
     def __init__(self, params):
